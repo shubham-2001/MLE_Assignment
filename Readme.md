@@ -114,21 +114,95 @@ Now the API is running at `http://127.0.0.1:5000/`.
 ## 🎨 **Simple Frontend (Optional)**
 A basic **HTML Form** that interacts with the API:
 ```html
-<form id="predict-form">
-    <input type="number" name="bedrooms" placeholder="Bedrooms">
-    <input type="number" name="bathrooms" placeholder="Bathrooms">
-    <input type="number" name="sqft_living" placeholder="Sqft Living">
-    <button type="submit">Predict</button>
-</form>
-<script>
-document.getElementById('predict-form').addEventListener('submit', async function(event) {
-    event.preventDefault();
-    let data = { bedrooms: 3, bathrooms: 2.5, sqft_living: 2000 };
-    let response = await fetch('/predict', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-    let result = await response.json();
-    alert('Predicted Price: ' + result.predicted_price);
-});
-</script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>House Price Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 400px;
+            margin: 50px auto;
+            text-align: center;
+        }
+        input, button {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #result {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 20px;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>🏡 House Price Prediction</h2>
+    
+    <form id="predict-form">
+        <input type="number" name="bedrooms" placeholder="Bedrooms" required>
+        <input type="number" name="bathrooms" placeholder="Bathrooms" step="0.5" required>
+        <input type="number" name="sqft_living" placeholder="Sqft Living" required>
+        <input type="number" name="sqft_lot" placeholder="Sqft Lot" required>
+        <input type="number" name="sqft_above" placeholder="Sqft Above" required>
+        <input type="number" name="sqft_basement" placeholder="Sqft Basement" required>
+        <button type="submit">Predict</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+    document.getElementById('predict-form').addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        let formData = new FormData(event.target);
+        let data = {
+            bedrooms: parseFloat(formData.get("bedrooms")),
+            bathrooms: parseFloat(formData.get("bathrooms")),
+            sqft_living: parseFloat(formData.get("sqft_living")),
+            sqft_lot: parseFloat(formData.get("sqft_lot")),
+            sqft_above: parseFloat(formData.get("sqft_above")),
+            sqft_basement: parseFloat(formData.get("sqft_basement"))
+        };
+
+        try {
+            let response = await fetch("http://127.0.0.1:5000/predict", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            });
+
+            let result = await response.json();
+            if (response.ok) {
+                document.getElementById("result").innerText = "Predicted Price: $" + result.predicted_price.toLocaleString();
+            } else {
+                document.getElementById("result").innerText = "Error: " + (result.error || "Something went wrong.");
+            }
+
+        } catch (error) {
+            document.getElementById("result").innerText = "Error: Failed to connect to the server.";
+        }
+    });
+    </script>
+
+</body>
+</html>
 ```
 
 ---
